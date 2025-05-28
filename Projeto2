@@ -1,0 +1,47 @@
+import moviepy.editor as mpe
+import moviepy.video.fx.all as vfx
+from moviepy.audio.fx.all import audio_fadeout
+import os
+
+# Caminho correto para o vídeo no Kaggle
+video_path = "/kaggle/input/videoproj/video.MOV"
+
+# Verifica se o arquivo existe
+if not os.path.exists(video_path):
+    raise FileNotFoundError("O vídeo não foi encontrado. Verifique se está no dataset 'videoo'.")
+
+# Abre o vídeo
+video = mpe.VideoFileClip(video_path)
+
+tempo = 20  # tempo para inverter a imagem
+
+partes = []  # lista para os subclipes
+for inicio in range(0, int(video.duration), tempo): # divide o video e inverte a imagem das partes
+    fim = min(inicio + tempo, video.duration) # roda até o final do vídeo
+    subclip = video.subclip(inicio, fim)
+    if inicio // tempo % 2 == 1: # intervalo ímpar, inverte a imagem
+        subclip = vfx.mirror_x(subclip)
+    partes.append(subclip)
+
+video1 = mpe.concatenate_videoclips(partes) # junta os subclipes 
+video1.ipython_display(width=480, maxduration=180)
+
+fadeout = video1.duration - 10 # tempo para diminuir o som
+video2 = video1.set_audio(video1.audio.fx(audio_fadeout, fadeout)) # aplica o fadeout
+video2.ipython_display(width=480, maxduration=180)
+
+corte_inicio = 60  # segundos
+corte_fim = 80  # segundos
+
+pre_corte = video2.subclip(0, corte_inicio)  # Primeira parte do vídeo antes do corte
+corte = video2.subclip(corte_inicio, corte_fim)  # Parte cortada de 60 a 80 segundos
+pos_corte = video2.subclip(corte_fim)  # Parte restante do vídeo após o corte
+
+# Concatena o vídeo com a parte recortada no final
+resultado = mpe.concatenate_videoclips([pre_corte, pos_corte, corte])
+
+# Salva o resultado final
+output_path = "/kaggle/working/resultado.mp4"
+resultado.write_videofile(output_path, codec='libx264')
+
+print(f"Vídeo final salvo em: {output_path}")
