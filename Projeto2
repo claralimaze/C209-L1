@@ -42,6 +42,6 @@ resultado = mpe.concatenate_videoclips([pre_corte, pos_corte, corte])
 
 # Salva o resultado final
 output_path = "/kaggle/working/resultado.mp4"
-resultado.write_videofile(output_path, codec='libx264')
+resultado.write_videofile(output_path, codec='libx264', audio_codec='aac', audio=True)
 
 print(f"Vídeo final salvo em: {output_path}")
